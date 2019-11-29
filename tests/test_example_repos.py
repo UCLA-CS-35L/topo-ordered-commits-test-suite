@@ -60,8 +60,21 @@ def get_child_to_parent_edges(repo_id):
 
 def assign_commit_order_and_detect_duplicates(output_lines):
     assigned_order = {}
-    for line in output_lines:
-        if line and '=' not in line:
+    num_lines = len(output_lines)
+    for i in range(num_lines):
+        line = output_lines[i]
+
+        # ignore sticky starts and ends
+        if line.startswith('='):
+            continue
+
+        # ignore sticky ends
+        if i < num_lines - 1 and output_lines[i + 1] == '':
+            if not line.endswith('='):
+                raise Exception(f'The line before the empty line has to end with =, but found {line}')
+            continue
+
+        if line:
             commit_hash = line.split()[0]
             if commit_hash in assigned_order:
                 raise Exception(f'Duplicate commits detected. Commit hash: {commit_hash}')
