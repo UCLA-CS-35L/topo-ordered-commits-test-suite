@@ -1,2 +1,8 @@
+# Keep the function signature,
+# but replace its body with your implementation
 def topo_order_commits():
-    print('hi')
+    raise NotImplementedError
+
+
+if __name__ == '__main__':
+    topo_order_commits()

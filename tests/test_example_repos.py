@@ -89,6 +89,23 @@ def test_sticky_starts_and_ends(repo_id, capsys):
                 raise Exception(f'The commit {parent} after {child} is not its parent')
 
 
+@pytest.mark.parametrize("repo_id", [1, 2, 3, 4])
+def test_branch_heads(repo_id, capsys):
+    run_topo_order_commits_on_repo(repo_id)
+    output_lines = capsys.readouterr().out.strip().split('\n')
+    head_to_branch = get_head_to_branch(repo_id)
+    for line in output_lines:
+        if line and not line.startswith('='):
+            h = line.split()[0]
+            if h in head_to_branch:
+                branches = head_to_branch[h]
+                output_branches = set(line.split()[1:])
+                if output_branches != branches:
+                    raise Exception(
+                        f'Commit {h} should be associated with branch {branches}, but found {output_branches}'
+                    )
+
+
 def get_parents_from_sticky_end(sticky_end):
     return set(sticky_end.strip()[:-1].split())
 
@@ -170,3 +187,14 @@ def assign_commit_order_and_detect_duplicates(output_lines):
                 raise Exception(f'Duplicate commits detected. Commit hash: {commit_hash}')
             assigned_order[commit_hash] = len(assigned_order)
     return assigned_order
+
+
+def get_head_to_branch(repo_id):
+    repo_fixture_dir = get_repo_fixture_dir()
+    repo_name = get_repo_name_from_id(repo_id)
+    head_to_branch = defaultdict(set)
+    with open(os.path.join(repo_fixture_dir, f'{repo_name}-branch-heads.txt'), 'r') as file:
+        for line in file:
+            branch_name, head = line.split()
+            head_to_branch[head].add(branch_name)
+    return dict(head_to_branch)
