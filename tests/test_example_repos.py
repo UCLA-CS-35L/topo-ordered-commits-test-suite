@@ -8,16 +8,8 @@ from topo_order_commits import topo_order_commits
 
 @pytest.mark.parametrize("repo_id", ['1'])
 def test_topo_order_constraint(repo_id, capsys):
-    repo_fixture_dir = get_repo_fixture_dir()
-    repo_name = get_repo_name_from_id(repo_id)
-    untar_repo_if_needed(repo_fixture_dir, repo_name)
-
-    child_to_parent_edges = get_child_to_parent_edges(os.path.join(repo_fixture_dir, f'{repo_name}-edges.txt'))
-
-    cwd = os.getcwd()
-    os.chdir(os.path.join(repo_fixture_dir, repo_name))
-    topo_order_commits()
-
+    run_topo_order_commits_on_repo(repo_id)
+    child_to_parent_edges = get_child_to_parent_edges(repo_id)
     output_lines = capsys.readouterr().out.strip().split('\n')
     assigned_commit_order = assign_commit_order_and_detect_duplicates(output_lines)
 
@@ -32,6 +24,15 @@ def test_topo_order_constraint(repo_id, capsys):
         assert assigned_commit_order[child] < assigned_commit_order[parent], \
             f'{child} has to precede {parent} in a topological order'
 
+
+def run_topo_order_commits_on_repo(repo_id):
+    repo_fixture_dir = get_repo_fixture_dir()
+    repo_name = get_repo_name_from_id(repo_id)
+    untar_repo_if_needed(repo_fixture_dir, repo_name)
+
+    cwd = os.getcwd()
+    os.chdir(os.path.join(repo_fixture_dir, repo_name))
+    topo_order_commits()
     os.chdir(cwd)
 
 
@@ -50,8 +51,10 @@ def untar_repo_if_needed(repo_fixture_dir, repo_name):
         tar.close()
 
 
-def get_child_to_parent_edges(filepath):
-    with open(filepath, 'r') as file:
+def get_child_to_parent_edges(repo_id):
+    repo_fixture_dir = get_repo_fixture_dir()
+    repo_name = get_repo_name_from_id(repo_id)
+    with open(os.path.join(repo_fixture_dir, f'{repo_name}-edges.txt'), 'r') as file:
         return [line.split() for line in file]
 
 
