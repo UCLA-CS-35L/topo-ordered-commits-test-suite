@@ -8,12 +8,9 @@ from topo_order_commits import topo_order_commits
 
 @pytest.mark.parametrize("repo_id", ['1'])
 def test_topo_order_constraint(repo_id, capsys):
-    repo_fixture_dir = os.path.join('tests', 'repo_fixture')
-    repo_name = f'example-repo-{repo_id}'
-    if not os.path.exists(os.path.join(repo_fixture_dir, repo_name)):
-        tar = tarfile.open(os.path.join(repo_fixture_dir, f'{repo_name}.tar.gz'))
-        tar.extractall(path=repo_fixture_dir)
-        tar.close()
+    repo_fixture_dir = get_repo_fixture_dir()
+    repo_name = get_repo_name_from_id(repo_id)
+    untar_repo_if_needed(repo_fixture_dir, repo_name)
 
     child_to_parent_edges = get_child_to_parent_edges(os.path.join(repo_fixture_dir, f'{repo_name}-edges.txt'))
 
@@ -38,6 +35,26 @@ def test_topo_order_constraint(repo_id, capsys):
     os.chdir(cwd)
 
 
+def get_repo_fixture_dir():
+    return os.path.join(os.path.dirname(__file__), 'repo_fixture')
+
+
+def get_repo_name_from_id(repo_id):
+    return f'example-repo-{repo_id}'
+
+
+def untar_repo_if_needed(repo_fixture_dir, repo_name):
+    if not os.path.exists(os.path.join(repo_fixture_dir, repo_name)):
+        tar = tarfile.open(os.path.join(repo_fixture_dir, f'{repo_name}.tar.gz'))
+        tar.extractall(path=repo_fixture_dir)
+        tar.close()
+
+
+def get_child_to_parent_edges(filepath):
+    with open(filepath, 'r') as file:
+        return [line.split() for line in file]
+
+
 def assign_commit_order_and_detect_duplicates(output_lines):
     assigned_order = {}
     for line in output_lines:
@@ -47,8 +64,3 @@ def assign_commit_order_and_detect_duplicates(output_lines):
                 raise Exception(f'Duplicate commits detected. Commit hash: {commit_hash}')
             assigned_order[commit_hash] = len(assigned_order)
     return assigned_order
-
-
-def get_child_to_parent_edges(filepath):
-    with open(filepath, 'r') as file:
-        return [line.split() for line in file]
