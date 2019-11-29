@@ -76,9 +76,6 @@ def test_sticky_starts_and_ends(repo_id, capsys):
                     f'but found {parents}'
                 )
 
-            # if i + 2 >= num_lines or not line[i + 2].startswith('='):
-            #     raise TopoSortError(f'Sticky start missing for line {i + 1} (1-based indexing)')
-
         # 3. Check that if the next line is not a sticky end, then the next commit is a parent of the current commit.
         # But ignore the last line, sticky starts even if the next line is not a sticky end.
         elif i + 1 < num_lines and not line.startswith('=') and (i + 2 >= num_lines or output_lines[i + 2] != ''):
