@@ -16,10 +16,10 @@ def test_topo_order_constraint(repo_id, capsys):
 
     for child, parents in child_to_parent_edges.items():
         if child not in assigned_commit_order:
-            raise Exception(f'Missing commit hash {child}')
+            raise TopoSortError(f'Missing commit hash {child}')
         for p in parents:
             if p not in assigned_commit_order:
-                raise Exception(f'Missing commit hash {p}')
+                raise TopoSortError(f'Missing commit hash {p}')
 
             assert assigned_commit_order[child] < assigned_commit_order[p], \
                 f'{child} has to precede {p} in a topological order'
@@ -38,55 +38,57 @@ def test_sticky_starts_and_ends(repo_id, capsys):
 
         if not line:
             if i == num_lines - 1:
-                raise Exception('The last output line should not be empty')
+                raise TopoSortError('The last output line should not be empty')
             sticky_start = output_lines[i + 1]
             if not sticky_start.startswith('='):
-                raise Exception(
+                raise TopoSortError(
                     f'The line after an empty line should be a stick start line, i.e. starting with an equal sign, '
                     f'but found {sticky_start}'
                 )
             children = set(sticky_start[1:].split())
             if i + 2 >= num_lines:
-                raise Exception(f'There has to be a commit after the sticky start {sticky_start}')
+                raise TopoSortError(f'There has to be a commit after the sticky start {sticky_start}')
             parent = output_lines[i + 2].split()[0]
             if children != parent_to_children[parent]:
-                raise Exception(f'The sticky start before commit {parent} should contain {parent_to_children[parent]}, '
-                                f'but found {children}')
+                raise TopoSortError(
+                    f'The sticky start before commit {parent} should contain {parent_to_children[parent]}, '
+                    f'but found {children}'
+                )
 
         elif i + 1 < num_lines and output_lines[i + 1] == '':
             # 1. When there is an empty line, check that the line before is a sticky end
             if not line.endswith('='):
-                raise Exception(f'The line before the empty line has to end with =, but found {line}')
+                raise TopoSortError(f'The line before the empty line has to end with =, but found {line}')
 
             if i == 0:
-                raise Exception('A sticky end should not be the first line')
+                raise TopoSortError('A sticky end should not be the first line')
             child = output_lines[i - 1].split()[0]
             parents = get_parents_from_sticky_end(output_lines[i])
 
             if child not in child_to_parent_edges:
-                raise Exception(f'Extraneous child found: {child}')
+                raise TopoSortError(f'Extraneous child found: {child}')
 
             # 2. When there is a sticky end as indicated by an empty line
             # check that the sticky end contains the correct parents
             if parents != set(child_to_parent_edges[child]):
-                raise Exception(
+                raise TopoSortError(
                     f'The sticky end after commit {child} should contain {child_to_parent_edges[child]}, '
                     f'but found {parents}'
                 )
 
             # if i + 2 >= num_lines or not line[i + 2].startswith('='):
-            #     raise Exception(f'Sticky start missing for line {i + 1} (1-based indexing)')
+            #     raise TopoSortError(f'Sticky start missing for line {i + 1} (1-based indexing)')
 
         # 3. Check that if the next line is not a sticky end, then the next commit is a parent of the current commit.
         # But ignore the last line, sticky starts even if the next line is not a sticky end.
         elif i + 1 < num_lines and not line.startswith('=') and (i + 2 >= num_lines or output_lines[i + 2] != ''):
             child = line.split()[0]
             if child not in child_to_parent_edges:
-                raise Exception(f'Extraneous child found: {child}')
+                raise TopoSortError(f'Extraneous child found: {child}')
 
             parent = output_lines[i + 1].split()[0]
             if parent not in child_to_parent_edges[child]:
-                raise Exception(f'The commit {parent} after {child} is not its parent')
+                raise TopoSortError(f'The commit {parent} after {child} is not its parent')
 
 
 @pytest.mark.parametrize("repo_id", [1, 2, 3, 4])
@@ -101,7 +103,7 @@ def test_branch_heads(repo_id, capsys):
                 branches = head_to_branch[h]
                 output_branches = set(line.split()[1:])
                 if output_branches != branches:
-                    raise Exception(
+                    raise TopoSortError(
                         f'Commit {h} should be associated with branch {branches}, but found {output_branches}'
                     )
 
@@ -178,13 +180,13 @@ def assign_commit_order_and_detect_duplicates(output_lines):
         # ignore sticky ends
         if i + 1 < num_lines and output_lines[i + 1] == '':
             if not line.endswith('='):
-                raise Exception(f'The line before the empty line has to end with =, but found {line}')
+                raise TopoSortError(f'The line before the empty line has to end with =, but found {line}')
             continue
 
         if line:
             commit_hash = line.split()[0]
             if commit_hash in assigned_order:
-                raise Exception(f'Duplicate commits detected. Commit hash: {commit_hash}')
+                raise TopoSortError(f'Duplicate commits detected. Commit hash: {commit_hash}')
             assigned_order[commit_hash] = len(assigned_order)
     return assigned_order
 
@@ -198,3 +200,7 @@ def get_head_to_branch(repo_id):
             branch_name, head = line.split()
             head_to_branch[head].add(branch_name)
     return dict(head_to_branch)
+
+
+class TopoSortError(Exception):
+    pass
