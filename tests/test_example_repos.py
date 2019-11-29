@@ -7,7 +7,7 @@ import pytest
 from topo_order_commits import topo_order_commits
 
 
-@pytest.mark.parametrize("repo_id", ['1'])
+@pytest.mark.parametrize("repo_id", [1, 2, 3, 4])
 def test_topo_order_constraint(repo_id, capsys):
     run_topo_order_commits_on_repo(repo_id)
     child_to_parent_edges = get_child_to_parent_edges(repo_id)
@@ -25,7 +25,7 @@ def test_topo_order_constraint(repo_id, capsys):
                 f'{child} has to precede {p} in a topological order'
 
 
-@pytest.mark.parametrize("repo_id", ['1'])
+@pytest.mark.parametrize("repo_id", [1, 2, 3, 4])
 def test_sticky_starts_and_ends(repo_id, capsys):
     run_topo_order_commits_on_repo(repo_id)
     child_to_parent_edges = get_child_to_parent_edges(repo_id)
