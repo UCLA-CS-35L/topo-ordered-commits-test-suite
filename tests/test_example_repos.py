@@ -21,8 +21,10 @@ def test_topo_order_constraint(repo_id, capsys):
             if p not in assigned_commit_order:
                 raise TopoSortError(f'Missing commit hash {p}')
 
-            assert assigned_commit_order[child] < assigned_commit_order[p], \
-                f'{child} has to precede {p} in a topological order'
+            if not assigned_commit_order[child] < assigned_commit_order[p]:
+                raise TopoSortError(
+                    f'{child} has to precede {p} in a topological order'
+                )
 
 
 @pytest.mark.parametrize("repo_id", [1, 2, 3, 4])
@@ -93,8 +95,12 @@ def test_branch_heads(repo_id, capsys):
     run_topo_order_commits_on_repo(repo_id)
     output_lines = capsys.readouterr().out.strip().split('\n')
     head_to_branch = get_head_to_branch(repo_id)
-    for line in output_lines:
-        if line and not line.startswith('='):
+    num_lines = len(output_lines)
+    captured_branches = set()
+    for i in range(num_lines):
+        line = output_lines[i]
+        # ignore empty lines, sticky starts, sticky ends
+        if line and not line.startswith('=') and (i + 1 >= num_lines or output_lines[i + 1]):
             h = line.split()[0]
             if h in head_to_branch:
                 branches = head_to_branch[h]
@@ -103,6 +109,12 @@ def test_branch_heads(repo_id, capsys):
                     raise TopoSortError(
                         f'Commit {h} should be associated with branch {branches}, but found {output_branches}'
                     )
+                else:
+                    captured_branches |= output_branches
+
+    all_branches = set().union(*list(head_to_branch.values()))
+    if captured_branches != all_branches:
+        raise TopoSortError(f'Only captured {len(captured_branches)} out of {len(all_branches)} branch heads')
 
 
 def get_parents_from_sticky_end(sticky_end):
@@ -141,7 +153,7 @@ def get_child_to_parent_edges(repo_id):
     child_to_parents = defaultdict(set)
     with open(os.path.join(repo_fixture_dir, f'{repo_name}-edges.txt'), 'r') as file:
         for line in file:
-            if not line:
+            if not line.strip():
                 continue
             toks = line.split()
             if len(toks) == 1 and toks[0] not in child_to_parents:
