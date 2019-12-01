@@ -114,7 +114,7 @@ def test_branch_heads(repo_id, capsys):
 
     all_branches = set().union(*list(head_to_branch.values()))
     if captured_branches != all_branches:
-        raise TopoSortError(f'Only captured {len(captured_branches)} out of {len(all_branches)} branch heads')
+        raise TopoSortError(f'Only correctly captured {len(captured_branches)} out of {len(all_branches)} branch heads')
 
 
 def get_parents_from_sticky_end(sticky_end):
