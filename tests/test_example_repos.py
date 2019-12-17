@@ -78,7 +78,17 @@ def test_sticky_starts_and_ends(repo_id, capsys):
                     f'but found {parents}'
                 )
 
-        # 3. Check that if the next line is not a sticky end, then the next commit is a parent of the current commit.
+            # 3. Check that the commit at i + 2 is not the parent of the child
+            if i + 3 < num_lines:
+                # if child == 'e93c66eaa74c37cb599f31ed2190d74730f64b48':
+                #     assert False, f'{child_to_parent_edges[child]}, {output_lines[i+3]}'
+                if output_lines[i + 3].split()[0] in child_to_parent_edges[child]:
+                    raise TopoSortError(
+                        f'The commit {output_lines[i + 3].split()[0]} in line {i + 4} is the '
+                        f'parent of {child} but a sticky end is inserted between them'
+                    )
+
+        # 4. Check that if the next line is not a sticky end, then the next commit is a parent of the current commit.
         # But ignore the last line, sticky starts even if the next line is not a sticky end.
         elif i + 1 < num_lines and not line.startswith('=') and (i + 2 >= num_lines or output_lines[i + 2] != ''):
             child = line.split()[0]
