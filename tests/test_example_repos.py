@@ -23,9 +23,7 @@ def test_topo_order_constraint(repo_id, capsys):
                 raise TopoSortError(f'Missing commit hash {p}')
 
             if not assigned_commit_order[child] < assigned_commit_order[p]:
-                raise TopoSortError(
-                    f'{child} has to precede {p} in a topological order'
-                )
+                raise TopoSortError(f'{child} has to precede {p} in a topological order')
 
 
 @pytest.mark.parametrize("repo_id", [1, 2, 3, 4, 5, 6, 7])
@@ -82,8 +80,6 @@ def test_sticky_starts_and_ends(repo_id, capsys):
 
             # 3. Check that the commit at i + 2 is not the parent of the child
             if i + 3 < num_lines:
-                # if child == 'e93c66eaa74c37cb599f31ed2190d74730f64b48':
-                #     assert False, f'{child_to_parent_edges[child]}, {output_lines[i+3]}'
                 if output_lines[i + 3].split()[0] in child_to_parent_edges[child]:
                     raise TopoSortError(
                         f'The commit {output_lines[i + 3].split()[0]} in line {i + 4} is the '
