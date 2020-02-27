@@ -7,7 +7,7 @@ import pytest
 from topo_order_commits import topo_order_commits
 
 
-@pytest.mark.parametrize("repo_id", [1, 2, 3, 4, 5, 6, 7])
+@pytest.mark.parametrize("repo_id", list(range(1, 9)))
 @pytest.mark.timeout(10)
 def test_topo_order_constraint(repo_id, capsys):
     run_topo_order_commits_on_repo(repo_id)
@@ -26,7 +26,7 @@ def test_topo_order_constraint(repo_id, capsys):
                 raise TopoSortError(f'{child} has to precede {p} in a topological order')
 
 
-@pytest.mark.parametrize("repo_id", [1, 2, 3, 4, 5, 6, 7])
+@pytest.mark.parametrize("repo_id", list(range(1, 9)))
 @pytest.mark.timeout(10)
 def test_sticky_starts_and_ends(repo_id, capsys):
     run_topo_order_commits_on_repo(repo_id)
@@ -98,7 +98,7 @@ def test_sticky_starts_and_ends(repo_id, capsys):
                 raise TopoSortError(f'The commit {parent} after {child} is not its parent')
 
 
-@pytest.mark.parametrize("repo_id", [1, 2, 3, 4, 5, 6, 7])
+@pytest.mark.parametrize("repo_id", list(range(1, 9)))
 @pytest.mark.timeout(10)
 def test_branch_heads(repo_id, capsys):
     run_topo_order_commits_on_repo(repo_id)
