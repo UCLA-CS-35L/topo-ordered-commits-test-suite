@@ -29,6 +29,11 @@ In order to run the tests, simply type
 pytest
 ```
 
+To check for PEP8 coding style violations:
+```
+flake8 topo_order_commits.py
+```
+
 You can exit the virtual environment by typing `deactivate`.
 
 
