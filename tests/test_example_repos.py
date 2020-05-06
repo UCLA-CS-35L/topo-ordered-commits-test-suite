@@ -86,8 +86,9 @@ def test_sticky_starts_and_ends(repo_id, capsys):
                         f'parent of {child} but a sticky end is inserted between them'
                     )
 
-        # 4. Check that if the next line is not a sticky end, then the next commit is a parent of the current commit.
-        # But ignore the last line, sticky starts even if the next line is not a sticky end.
+        # 4. Check that if the next line is not a sticky end (the third condition in the elif),
+        # then the next commit is a parent of the current commit,
+        # except when the current line is the last line or a sticky start.
         elif i + 1 < num_lines and not line.startswith('=') and (i + 2 >= num_lines or output_lines[i + 2] != ''):
             child = line.split()[0]
             if child not in child_to_parent_edges:
