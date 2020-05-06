@@ -1,4 +1,5 @@
 import os
+import re
 import tarfile
 from collections import defaultdict
 
@@ -138,9 +139,20 @@ def run_topo_order_commits_on_repo(repo_id):
 
     cwd = os.getcwd()
     os.chdir(os.path.join(repo_fixture_dir, repo_name))
+
+    if has_word_setrecursionlimit('../../../topo_order_commits.py'):
+        raise TopoSortError('script cannot contain the word setrecursionlimit')
+
     topo_order_commits()
     os.chdir(cwd)
 
+
+def has_word_setrecursionlimit(file_path):
+    with open(file_path, 'r') as file:
+        for line in file:
+            if re.search(r'setrecursionlimit', line):
+                return True
+    return False
 
 def get_repo_fixture_dir():
     return os.path.join(os.path.dirname(__file__), 'repo_fixture')
