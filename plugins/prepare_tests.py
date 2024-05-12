@@ -6,14 +6,15 @@ from tests.test_example_repos import get_repo_fixture_dir, get_repo_name_from_id
 
 
 def pytest_configure(config):
+    print("Configuring tests...")
+    repo_fixture_dir = get_repo_fixture_dir()
     for repo_id in range(1, 9):
-        repo_fixture_dir = get_repo_fixture_dir()
         repo_name = get_repo_name_from_id(repo_id)
         untar_repo_if_needed(repo_fixture_dir, repo_name)
 
 
 def pytest_unconfigure(config):
-    pass
+    print("Unconfiguring tests...")
 
 
 def untar_repo_if_needed(repo_fixture_dir, repo_name):
