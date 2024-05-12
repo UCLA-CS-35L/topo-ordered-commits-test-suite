@@ -4,3 +4,4 @@
 *.pyc
 tests/repo_fixture
 .pytest_cache/
+venv/
