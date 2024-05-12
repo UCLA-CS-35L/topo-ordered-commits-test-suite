@@ -1,3 +1,3 @@
 pytest_plugins = [
-    "plugins.prepare_tests",
+    "tests.plugins.prepare_tests",
 ]
