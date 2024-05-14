@@ -9,7 +9,7 @@ The real test cases might have similar structures but will not have the same has
 Please do the following in order to run the test cases.
 
 ```
-git clone https://github.com/Rustinante/topo-ordered-commits-test-suite.git
+git clone https://github.com/UCLA-CS-35L/topo-ordered-commits-test-suite.git
 cd topo-ordered-commits-test-suite
 python3 -m venv venv
 source venv/bin/activate
@@ -32,6 +32,15 @@ pytest
 To check for PEP8 coding style violations:
 ```
 flake8 topo_order_commits.py
+```
+
+You can use the autoformatter, `autopep8`, resolve some common formatting issues.
+
+```
+# This command will resolve many common formatting issues.
+autopep8 --in-place topo_order_commits.py
+# Be careful with this command, as it will aggressively overwrite your file.
+autopep8 --in-place --aggressive --aggressive topo_order_commits.py
 ```
 
 You can exit the virtual environment by typing `deactivate`.

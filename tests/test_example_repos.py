@@ -1,6 +1,5 @@
 import os
 import re
-import tarfile
 from collections import defaultdict
 
 import pytest
@@ -135,7 +134,6 @@ def get_parents_from_sticky_end(sticky_end):
 def run_topo_order_commits_on_repo(repo_id):
     repo_fixture_dir = get_repo_fixture_dir()
     repo_name = get_repo_name_from_id(repo_id)
-    untar_repo_if_needed(repo_fixture_dir, repo_name)
 
     cwd = os.getcwd()
     os.chdir(os.path.join(repo_fixture_dir, repo_name))
@@ -160,13 +158,6 @@ def get_repo_fixture_dir():
 
 def get_repo_name_from_id(repo_id):
     return f'example-repo-{repo_id}'
-
-
-def untar_repo_if_needed(repo_fixture_dir, repo_name):
-    if not os.path.exists(os.path.join(repo_fixture_dir, repo_name)):
-        tar = tarfile.open(os.path.join(repo_fixture_dir, f'{repo_name}.tar.gz'))
-        tar.extractall(path=repo_fixture_dir)
-        tar.close()
 
 
 def get_child_to_parent_edges(repo_id):
